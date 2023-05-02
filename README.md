@@ -25,7 +25,7 @@ This guide explains how to use the code provided in this repository in order to 
 2. **QRFSI12** (QRFSI12 attenuation data)
 3. **BANCAL22_runs** (inversion output data)
 
-Code directories contain scripts that turn an input into an output. Data directories store data. "How are the code directories structured?", I hear you ask...
+Code directories contain scripts that turn an input into an output. Data directories store data, and are too large to go in this GitHub repository - but you can download them here: https://www.dropbox.com/sh/y5obvxfzz70z11i/AAA9PISfQH3H1zjGGG7UO78qa?dl=0. Link broken? Email me. "How are the code directories structured?", I hear you ask...
 
 ### Code directory structure
 Each code directory contains a **config** folder, in which you can store a [config_name].ini file. An example of how the config file should be structured is included in each code directory. The config file tells the scripts in the code directory where it can find inputs, and where it should store outputs. 
