@@ -2,6 +2,8 @@
 
 The code provided in this repository relates to the manuscript entitled "Probabilistic Assessment of Antarctic Thermomechanical Structure: Impacts on Ice Sheet Stability". Something not clear about how to use this code? Email me: **j.hazzard20@imperial.ac.uk**. 
 
+Please respect the user license associated with this code. You should cite the associated manuscript (DOI: xxx) in any research produced using the materials provided herein.
+
 ## The workflow 
 
 This guide explains how to use the code provided in this repository in order to generate the outputs described in the manuscript. Let's start with a summary of what can be found here. 
