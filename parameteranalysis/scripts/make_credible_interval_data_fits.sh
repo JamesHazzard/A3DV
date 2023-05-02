@@ -1,0 +1,339 @@
+#!/bin/bash
+#source ~/.bash_profile
+
+calculate_credible_interval(){
+
+  depthlines=$(wc -l depth_slices | awk '{print $1}')
+  #idx_min=2
+  idx_min=$(find ${fold_data_output_cidf}/plate -name 'plate_out_*.TVsz'  | wc -l | awk '{print $1 + 2}')
+  idx_min=$(echo $idx_min | awk '{print $1 - 10}' )
+  #idx_min=$(ls ${fold_data_output_cidf}/plate/plate_out_*.TVsz | wc -l | awk '{print $1 + 2}')
+  #idx_min=117270
+  idx_max=$(wc -l ${file_BANCAL22_data} | awk '{print $1}')
+  paramlines=$(wc -l ${file_BANCAL22_data} | awk '{print $1}')
+
+  #idx_min=23
+  #idx_max=23
+
+  for ((idx=$idx_min; idx<=$idx_max; idx++)); do
+
+    idx_out=$(echo $idx | awk '{print $1 - 2}')
+    mu0=$(head -n ${idx} ${file_BANCAL22_data} | tail -n 1 | awk '{print $2}')
+    dmudT=$(head -n ${idx} ${file_BANCAL22_data} | tail -n 1 | awk '{print $3}')
+    dmudP=$(head -n ${idx} ${file_BANCAL22_data} | tail -n 1 | awk '{print $4}')
+    eta0=$(head -n ${idx} ${file_BANCAL22_data} | tail -n 1 | awk '{print 10^$5}')
+    E=$(head -n ${idx} ${file_BANCAL22_data} | tail -n 1 | awk '{print $6}')
+    Va=$(head -n ${idx} ${file_BANCAL22_data} | tail -n 1 | awk '{print $7}')
+    solgrad=$(head -n ${idx} ${file_BANCAL22_data} | tail -n 1 | awk '{print $8}')
+
+    generate_plate_files
+    echo -n > ${fold_data_output_cidf}/plate/plate_out_${idx_out}.TVsz
+    for ((l=1; l<=$depthlines; l++)); do
+    	z=$(awk 'NR=='$l'{printf "%.1f", $1}' depth_slices)
+    	#echo "> -Z$p_post" >> ${CI_25_fold}/plate/plate_out_${idx_out}.TVs
+    	awk '{if ($1=='$z'){print $2, $3, $1}}' ${fold_conversion}/output_T_to_Vs.zTVsQvd >> ${fold_data_output_cidf}/plate/plate_out_${idx_out}.TVsz
+      cat ${fold_data_output_cidf}/plate/plate_out_${idx_out}.TVsz | wc -l
+    done
+
+    generate_attenuation_files
+    echo -n > ${fold_data_output_cidf}/attenuation/attenuation_out_${idx_out}.Qz
+    awk '{print $4, $1}' ${fold_conversion}/output_Vs_to_T.zTVsQvd >> ${fold_data_output_cidf}/attenuation/attenuation_out_${idx_out}.Qz
+
+    wait
+
+    generate_adiabat_files
+    echo -n > ${fold_data_output_cidf}/adiabat/adiabat_out_${idx_out}.Vsz
+    awk '{print $3, $1}' ${fold_conversion}/output_T_to_Vs.zTVsQvd >> ${fold_data_output_cidf}/adiabat/adiabat_out_${idx_out}.Vsz
+
+    generate_viscosity_files
+    echo -n > ${fold_data_output_cidf}/viscosity/viscosity_out.vz
+    awk '{print log($5)/log(10), $1}' ${fold_conversion}/output_Vs_to_T.zTVsQvd >> ${fold_data_output_cidf}/viscosity/viscosity_out.vz
+    awk 'NR>1 {sum+=$1} END {print sum/(NR-1), 0.5}' ${fold_data_output_cidf}/viscosity/viscosity_out.vz > ${fold_data_output_cidf}/viscosity/viscosity_avg_out_${idx_out}.vz
+
+    wait
+
+    echo $idx_out done
+
+  done
+
+  echo done
+  rm -f ${fold_data_output_cidf}/viscosity/viscosity_out.vz
+
+}
+
+plot_credible_interval(){
+
+  # Set GMT plotting parameters
+  gmt gmtset FORMAT_FLOAT_OUT %.8f FONT_LABEL 16p FONT_ANNOT_PRIMARY 14p PS_MEDIA a0
+
+  mkdir -p plots/VsT_fits
+
+  # Call python program to format parameter evolution into a sorted file we can read
+  #python3 format_output.py -a ./${bayesianresults_datetime}/
+
+  # Set plot name
+  ps="plots/VsT_fits/${model}_CI_${CI_type}_VsT_fit.ps"
+  jpg="plots/VsT_fits/${model}_CI_${CI_type}_VsT_fit.jpg"
+
+  # Set colour array for plot
+  #col_arr=(blue purple palevioletred orange goldenrod yellow gray)
+  col_arr=(black black black)
+  envelope_col_arr=(blue purple palevioletred)
+  #col_arr=(0/0/255 160/0/255 255/0/0)
+  #envelope_col_arr=(0/200/255 255/0/255 255/100/0)
+
+  ##############################################################################################################
+  # Vs-T plot
+  ##############################################################################################################
+  rgn="-R775/1475/4.15/4.7"
+  scale="-JX21.5c/13.4375c"
+  gmt psbasemap $rgn $scale -B0 -K -Y25c > $ps
+  depthlines=$(wc -l depth_slices | awk '{print $1}')
+
+  i=0
+  j=${i}
+  for ((l=1; l<=$depthlines; l++)); do
+
+    z=$(awk 'NR=='$l'{printf "%.1f", $1}' depth_slices)
+    z_min=$(echo $z | awk '{printf "%.0f", $1-12.5}')
+    z_max=$(echo $z | awk '{printf "%.0f", $1+12.5}')
+    awk '{if ($2=='$z'){print $4, $3, $5}}' ${inputfold}/plate_${model}${end}.txt | \
+        gmt psxy $rgn $scale -G${col_arr[$i]} -Ey1p/0.5p -K -O >> $ps
+    awk '{print $1,$2,$3,$4}' ${envelopefold}/${CI_type}/CI_99_envelope_plate_${z_min}_${z_max}.TVs |  \
+    gmt psxy $rgn $scale -G${envelope_col_arr[$i]} -O -K -L+b+t10 -t50 >> $ps
+    awk '{print $1,$2,$3,$4}' ${envelopefold}/${CI_type}/CI_50_envelope_plate_${z_min}_${z_max}.TVs | \
+    gmt psxy $rgn $scale -G${envelope_col_arr[$j]} -O -K -L+b+t10 -t40 >> $ps
+    awk '{if ($2=='$z'){print $4, $3, $5}}' ${inputfold}/plate_${model}${end}.txt | \
+        gmt psxy $rgn $scale -G${col_arr[$i]} -Sc0.225c -Ey0p/0p -K -O >> $ps
+    i=${i}+1
+    j=${i}
+
+  done
+
+
+  #echo "780.5 4.692 a" | gmt pstext $rgn $scale -F+f18p+jTL -Gwhite -TO -W1p -O -K >> $ps
+  gmt psbasemap $rgn $scale -Bpx100f50+l"Temperature (@~\260@~C)" -Bpy0.2f0.1+l"V@-S@- (km s@+-1@+)" -BWsNe -O -K >> $ps
+
+  echo Finished plate model plotting
+
+  ###############################################################################################################
+  ## Adiabat plot
+  ###############################################################################################################
+  mindep=225
+  rgn="-R4.3/5.0/145/405"
+  rgnx="-R0/1/0/1"
+  scale="-JX6.5c/-6.5c"
+  scalex="-JX6.5c/6.5c"
+  gmt psbasemap $rgn $scale -B0 -O -K -Y-7.5c >> $ps
+
+  awk '{print $2, $4}' ${envelopefold}/${CI_type}/CI_99_envelope_adiabat.Vsz > temp_adiabat
+  awk '{print $3, $4}' ${envelopefold}/${CI_type}/CI_99_envelope_adiabat.Vsz | tac >> temp_adiabat
+  head -n 1 temp_adiabat >> temp_adiabat
+  awk '{print $1, $2}' temp_adiabat | gmt psxy $rgn $scale -Gpalegreen2 -O -K -t50 >> $ps
+  rm temp_adiabat
+  awk '{print $2, $4}' ${envelopefold}/${CI_type}/CI_50_envelope_adiabat.Vsz > temp_adiabat
+  awk '{print $3, $4}' ${envelopefold}/${CI_type}/CI_50_envelope_adiabat.Vsz | tac >> temp_adiabat
+  head -n 1 temp_adiabat >> temp_adiabat
+  awk '{print $1, $2}' temp_adiabat | gmt psxy $rgn $scale -Gpalegreen2 -O -K -t40 >> $ps
+  awk '{print $1, $2, $4}' ${inputfold}/adiabat_${model}.txt | gmt psxy $rgn $scale -Sc0.225c \
+     -Gblack -K -O -N -By50f25+l"Depth (km)" -Bx0.2f0.1+l"V@-S@- (km s@+-1@+)" -BWSne -Ex2p/1p >> $ps
+
+  echo "0.025 0.97 b" | gmt pstext $rgnx $scalex -F+f18p+jTL -Gwhite -W1p -TO -O -K >> $ps
+  rm -f envelope out*.temp
+
+  echo Finished adiabatic model plotting
+
+  ###############################################################################################################
+  ## Attenuation Plot
+  ###############################################################################################################
+  rgn="-R1e-3/1e-1/145/405"
+  scale="-JX6.5cl/-6.5c"
+  gmt psbasemap $rgn $scale -B0 -K -O -X7.5c >> $ps
+
+
+  awk '{print $2, $4}' ${envelopefold}/${CI_type}/CI_99_envelope_attenuation.Qz > temp_attenuation
+  awk '{print $3, $4}' ${envelopefold}/${CI_type}/CI_99_envelope_attenuation.Qz | tac >> temp_attenuation
+  head -n 1 temp_attenuation >> temp_attenuation
+  awk '{print $1, $2}' temp_attenuation | gmt psxy $rgn $scale -Gpalegreen2 -O -K -t50 >> $ps
+  rm temp_attenuation
+  awk '{print $2, $4}' ${envelopefold}/${CI_type}/CI_50_envelope_attenuation.Qz > temp_attenuation
+  awk '{print $3, $4}' ${envelopefold}/${CI_type}/CI_50_envelope_attenuation.Qz | tac >> temp_attenuation
+  head -n 1 temp_attenuation >> temp_attenuation
+  awk '{print $1, $2}' temp_attenuation | gmt psxy $rgn $scale -Gpalegreen2 -O -K -t40 >> $ps
+  awk '{if ($3>=150 && $3%25==0 && $3<=400){print $1, $3, $5}}' ${inputfold}/attenuation_${model}.txt \
+     | gmt psxy $rgn $scale -Sc0.225c -Gblack -K -O -Bx1f3p+l"Attenuation (Q@-S@-@+-1@+)" -By50f25+l"Depth (km)" -BwSne -N -Ex2p/1p >> $ps
+
+  echo "0.025 0.97 c" | gmt pstext $rgnx $scalex -F+f18p+jTL -Gwhite -W1p -TO -O -K >> $ps
+  rm -f envelope out*.temp
+
+  echo Finished attenuation model plotting
+
+  ###############################################################################################################
+  ## Viscosity Plot
+  ###############################################################################################################
+  rgn="-R18/22/0/1"
+  scale="-JX6.5c/-6.5c"
+  gmt psbasemap $rgn $scale -B0 -K -O -X7.5c >> $ps
+
+  v_min=$(awk 'NR==2 {print $1}' ${envelopefold}/${CI_type}/CI_99_envelope_viscosity.vz)
+  v_max=$(awk 'NR==3 {print $1}' ${envelopefold}/${CI_type}/CI_99_envelope_viscosity.vz)
+  z_min=0.4
+  z_max=0.6
+  echo $v_min $z_max > temp_viscosity
+  echo $v_min $z_min >> temp_viscosity
+  echo $v_max $z_min >> temp_viscosity
+  echo $v_max $z_max >> temp_viscosity
+  head -n 1 temp_viscosity >> temp_viscosity
+  awk '{print $1, $2}' temp_viscosity | gmt psxy $rgn $scale -Gpalegreen2 -O -K -t50 >> $ps
+  rm temp_viscosity
+  v_min=$(awk 'NR==2 {print $1}' ${envelopefold}/${CI_type}/CI_50_envelope_viscosity.vz)
+  v_max=$(awk 'NR==3 {print $1}' ${envelopefold}/${CI_type}/CI_50_envelope_viscosity.vz)
+  z_min=0.4
+  z_max=0.6
+  echo $v_min $z_max > temp_viscosity
+  echo $v_min $z_min >> temp_viscosity
+  echo $v_max $z_min >> temp_viscosity
+  echo $v_max $z_max >> temp_viscosity
+  head -n 1 temp_viscosity >> temp_viscosity
+  awk '{print $1, $2}' temp_viscosity | gmt psxy $rgn $scale -Gpalegreen2 -O -K -t40 >> $ps
+  awk '{print 20, 0.5, 1}' ${inputfold}/viscosity_${model}.txt | gmt psxy $rgn $scale -SC0.225c -Gblack -Ex2p/1p -O -K >> $ps
+
+  gmt psbasemap $rgn $scale -Bpx1f0.1+l"log@-10@-@~\150@~@-UM@- (Pa s)" -BwSne -O -K >> $ps
+  echo "0.025 0.97 d" | gmt pstext $rgnx $scalex -F+f18p+jTL -Gwhite -W1p -TO -O >> $ps
+
+  echo Finished viscosity model plotting
+
+
+  ################################################################################################################
+  #gmt psscale -Dx+8c/+8.25c+w12c/0.25c+e -Cposterior.cpt -B50f25+l"Posterior probability" -Al -O >> $ps	#move scale to cover all 4 plots
+  gmt psconvert $ps -Tj -E600 -A0.25c -P -Z
+
+  # Clean up
+  rm -f *_line* line_* *.cpt depth_slices big_points* lonlat box* intfile junk* envelope out*.temp temp_plate temp_adibat temp_attenuation temp_viscosity
+}
+
+
+generate_plate_files(){
+
+	cd ${fold_conversion}
+  # Oceanic Vs-T outputs
+  #echo "running plate"
+  awk '{print $4, $3}' $file_plate > ${fold_conversion}/input.zT
+  ./T2Vs $mu0 $dmudT $dmudP $eta0 $E $Va $solgrad $sol50 1 0 0
+  cd ${fold_scripts}
+
+}
+
+generate_adiabat_files(){
+
+	cd ${fold_conversion}
+	# Adiabatic outputs
+	#echo "running adiabat"
+  awk '{print $4, $3}' $file_adiabat > ${fold_conversion}/input.zT
+  ./T2Vs $mu0 $dmudT $dmudP $eta0 $E $Va $solgrad $sol50 1 0 0
+  cd ${fold_scripts}
+
+}
+
+generate_attenuation_files(){
+
+	cd ${fold_conversion}
+  # Attenuation outputs
+  #echo "running attenuation"
+  awk '{print $4, $3}' $file_attenuation > ${fold_conversion}/input.zVs
+  ./Vs2T $mu0 $dmudT $dmudP $eta0 $E $Va $solgrad $sol50 1 0 0
+  cd ${fold_scripts}
+
+}
+
+generate_viscosity_files(){
+
+	cd ${fold_conversion}
+  # Viscosity outputs
+  #echo "running viscosity"
+  awk '{print $4, $3}' $file_viscosity > ${fold_conversion}/input.zVs
+  ./Vs2T $mu0 $dmudT $dmudP $eta0 $E $Va $solgrad $sol50 1 0 0
+  cd ${fold_scripts}
+
+}
+
+# General parameters and filepaths
+model=ANT-20
+fold_base=$(awk '$1 ~ /^base/' config.ini | awk '{print $3}')
+fold_scripts=$(awk '$1 ~ /^scripts/' config.ini | awk '{print $3}')
+fold_conversion=${fold_base}/${fold_scripts}/vs_to_thermo_conversions
+fold_scripts=${fold_base}/${fold_scripts}
+fold_data_input=$(awk '$1 ~ /^data_input/' config.ini | awk '{print $3}')
+fold_BANCAL22_runs=$(awk '$1 ~ /^BANCAL22_runs/' config.ini | awk '{print $3}')
+fold_fwd_model_runs=$(awk '$1 ~ /^fwd_models/' config.ini | awk '{print $3}')
+fold_date=$(awk '$1 ~ /^date/' config.ini | awk '{print $3}')
+Tp=$(cat ${fold_data_input}/${fold_BANCAL22_runs}/${fold_date}/data/potential_temperature/potential_temperature.T)
+sol50=$(cat ${fold_data_input}/${fold_BANCAL22_runs}/${fold_date}/data/potential_temperature/solidus_50km_temperature.T)
+file_plate=${fold_data_input}/${fold_BANCAL22_runs}/${fold_date}/data/plate/plate.VseTz
+file_adiabat=${fold_data_input}/${fold_BANCAL22_runs}/${fold_date}/data/adiabat/adiabat.VseTz
+file_attenuation=${fold_data_input}/${fold_BANCAL22_runs}/${fold_date}/data/attenuation/attenuation.QeVsz
+file_viscosity=${fold_data_input}/${fold_BANCAL22_runs}/${fold_date}/data/viscosity/viscosity.neVsz
+file_BANCAL22_data=${fold_data_input}/${fold_BANCAL22_runs}/${fold_date}/samples_postburnin.csv
+file_fwd_models=${fold_data_input}/${fold_fwd_model_runs}/800k_fwd_models.txt
+file_priors=${fold_data_input}/${fold_fwd_model_runs}/priors.txt
+fold_data_output=$(awk '$1 ~ /^data_output/' config.ini | awk '{print $3}')
+fold_plot_output=$(awk '$1 ~ /^plot_output/' config.ini | awk '{print $3}')
+output_time=$fold_date
+
+mkdir -p ${fold_data_output}
+mkdir -p ${fold_data_output}/${output_time}
+mkdir -p ${fold_data_output}/${output_time}/Tp_${Tp}_sol50_${sol50}
+mkdir -p ${fold_data_output}/${output_time}/Tp_${Tp}_sol50_${sol50}/credible_interval_data_fits
+mkdir -p ${fold_plot_output}
+mkdir -p ${fold_plot_output}/${output_time}/Tp_${Tp}_sol50_${sol50}
+mkdir -p ${fold_plot_output}/${output_time}/Tp_${Tp}_sol50_${sol50}/credible_interval_data_fits
+
+fold_data_output_cidf=${fold_data_output}/${output_time}/Tp_${Tp}_sol50_${sol50}/credible_interval_data_fits
+mkdir -p ${fold_data_output_cidf}/plate
+mkdir -p ${fold_data_output_cidf}/adiabat
+mkdir -p ${fold_data_output_cidf}/attenuation
+mkdir -p ${fold_data_output_cidf}/viscosity
+fold_plot_output_cidf=${fold_plot_output}/${output_time}/Tp_${Tp}_sol50_${sol50}/credible_interval_data_fits
+
+# Top and bottom depth for Vs vs. T files
+#ztop=50
+#zbase=125
+#end="_avg_noTavg_${ztop}_${zbase}"
+#
+# Mid-point depths of Vs and T slices
+#cat << EOF > depth_slices
+#62.5
+#87.5
+#112.5
+#EOF
+
+# Top and bottom depth for Vs vs. T files
+#ztop=50
+#zbase=100
+#end="_avg_noTavg_${ztop}_${zbase}"
+
+# Mid-point depths of Vs and T slices
+#cat << EOF > depth_slices
+#62.5
+#87.5
+#EOF
+
+# Mid-point depths of Vs and T slices
+awk 'NR>1{a[$4]++} END{for(b in a) print b}' $file_plate | sort > depth_slices
+
+# Top and bottom depth for Vs vs. T files
+ztop=$(head -n 1 depth_slices | awk '{print int($1 - 12.5)}')
+zbase=$(tail -n 1 depth_slices | awk '{print int($1 + 12.5)}')
+end="_avg_noTavg_${ztop}_${zbase}"
+
+# Run program
+cd ${fold_conversion}
+make clean1
+make clean2
+make Vs2T
+make T2Vs
+cd ${fold_scripts}
+
+calculate_credible_interval
+
+rm -f junk* gmt.* depth_slices
