@@ -21,8 +21,8 @@ scripts:
 - make_viscosity_summary_plots.sh produces plots showing the comparison between seismic and geodetic inferences of viscosity across spatial and temporal scales
 
 References:
-- Lau et al. (2021, JGR), DOI: 10.1029/2021JB022622
-- Barletta et al. (2018, Science), DOI: 10.1126/science.aao1447
-- Samrat et al. (2020, GJI), DOI: 10.1093/gji/ggaa229
+- Lau et al. (2021, JGR), DOI: https://doi.org/10.1029/2021JB022622
+- Barletta et al. (2018, Science), DOI: https://doi.org/10.1126/science.aao1447
+- Samrat et al. (2021, GRL), DOI: https://doi.org/10.1029/2021GL097065
 - Ivins et al. (2021, JGR), DOI: https://doi.org/10.1029/2010JB007607
-- Wolstencroft et al. (2015, GJI), DOI: 10.1093/gji/ggv327
+- Wolstencroft et al. (2015, GJI), DOI: https://doi.org/10.1093/gji/ggv327
