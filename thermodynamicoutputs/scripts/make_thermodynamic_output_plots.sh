@@ -858,7 +858,7 @@ plot_temperature_quad_panel(){
   logetagrid=${fold_grid_visc}/viscosity_depth_${depth}_Tp_${Tp}_sol50_${sol50}_mean.grd
   #gmt grdcontour $logetagrid $rgn_map $proj_map -C+22.5 -W1p,177/252/3 -O -K >> $ps
   gmt pscoast $rgn_map $proj_map -Dh -A50000/0/2 -Wthin,black -O -K >> $ps
-  gmt psscale -Dx-4.5c/-1.1c+w7c/0.25c+e+h -Ctemp.cpt -B10f5+l"@~\163@~@-@~\161@~@- (@~\260@~C)" -Al -O -K >> $ps
+  gmt psscale -Dx-4.5c/-1.1c+w7c/0.25c+ef+h -Ctemp.cpt -B10f5+l"@~\163@~@-@~\161@~@- (@~\260@~C)" -Al -O -K >> $ps
   echo "0.6 1.05 150 km" | gmt pstext $rgnx $scalex -F+f18p+jTL -C+tO -Gwhite -W1p,black -N -O -K >> $ps
   echo "0.715 -0.05 b" | gmt pstext $rgnx $scalex -F+f18p+jBL -C+tO -Gwhite -W1p,black -N -O -K >> $ps
   depth=250
@@ -985,7 +985,7 @@ plot_viscosity_quad_panel(){
   gmt grdimage $logetagrid -Cvisc.cpt $rgn_map $proj_map -O -K >> $ps
   gmt grdcontour $logetagrid_mean $rgn_map $proj_map -C+22.5 -W1p,177/252/3 -O -K >> $ps
   gmt pscoast $rgn_map $proj_map -Dh -A50000/0/2 -Wthin,black -O -K >> $ps
-  gmt psscale -Dx-4.5c/-1.1c+w7c/0.25c+e+h -Cvisc.cpt -B0.25f0.25+l"log@-10@-@~\163@~@-@~\150@~@-" -Al -O -K >> $ps
+  gmt psscale -Dx-4.5c/-1.1c+w7c/0.25c+ef+h -Cvisc.cpt -B0.25f0.25+l"log@-10@-@~\163@~@-@~\150@~@-" -Al -O -K >> $ps
   echo "0.6 1.05 150 km" | gmt pstext $rgnx $scalex -F+f18p+jTL -C+tO -Gwhite -W1p,black -N -O -K >> $ps
   echo "0.715 -0.05 b" | gmt pstext $rgnx $scalex -F+f18p+jBL -C+tO -Gwhite -W1p,black -N -O -K >> $ps
   depth=250

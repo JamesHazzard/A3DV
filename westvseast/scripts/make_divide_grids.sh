@@ -261,7 +261,7 @@ plot_HF(){
   gmt psbasemap $rgn_map $proj_map -B0 -K -O -Y0c -X12c >> $ps
   gmt grdimage $HFgrid -Clitho.cpt $rgn_map $proj_map -E600 -O -K >> $ps
   gmt pscoast $rgn_map $proj_map -Dh -A50000/0/2 -Wthin,black -O -K >> $ps
-  gmt psscale -Dx0.5c/-2.0c+w9c/0.25c+e+h -Clitho.cpt -B2f1+l"@~\163@~@-HF@- (mW m@+-2@+)" -Al -O -K >> $ps
+  gmt psscale -Dx0.5c/-2.0c+w9c/0.25c+ef+h -Clitho.cpt -B2f1+l"@~\163@~@-HF@- (mW m@+-2@+)" -Al -O -K >> $ps
   echo "0.63 1.05 b" | gmt pstext $rgnx $scalex -F+f18p+jTR -C+tO -Gwhite -W1p,black -N -O -K >> $ps
   gmt psbasemap $rgn_map $proj_map -Bxa30f15 -O >> $ps
   rm litho.cpt

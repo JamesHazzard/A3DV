@@ -26,7 +26,7 @@ plot_LAB(){
     gmt psbasemap $rgn_map $proj_map -Bxa30f15 -K -Y30c -X10c > $ps
     gmt grdimage $LABgrid -Clitho.cpt $rgn_map $proj_map -E600 -O -K >> $ps
     gmt pscoast $rgn_map $proj_map -Dh -A50000/0/2 -Wthin,black -O -K >> $ps
-    gmt psscale -Dx0.5c/-1.8c+w9c/0.25c+e+h -Clitho.cpt -B50f10+l"z@-LAB@- (km)" -O -K >> $ps
+    gmt psscale -Dx0.5c/-1.8c+w9c/0.25c+ef+h -Clitho.cpt -B50f10+l"z@-LAB@- (km)" -O -K >> $ps
     echo "0.03 1.05 a" | gmt pstext $rgnx $scalex -F+f18p+jBL -C+tO -Gwhite -W1p,black -N -O -K >> $ps
     rm litho.cpt
 
@@ -37,7 +37,7 @@ plot_LAB(){
     gmt psbasemap $rgn_map $proj_map -Bxa30f15 -K -O -X11.8c >> $ps
     gmt grdimage $LABgrid -Clitho.cpt $rgn_map $proj_map -E600 -O -K >> $ps
     gmt pscoast $rgn_map $proj_map -Dh -A50000/0/2 -Wthin,black -O -K >> $ps
-    gmt psscale -Dx0.5c/-1.8c+w9c/0.25c+e+h -Clitho.cpt -B10f5+l"@~\163@~@-LAB@- (km)" -O -K >> $ps
+    gmt psscale -Dx0.5c/-1.8c+w9c/0.25c+ef+h -Clitho.cpt -B10f5+l"@~\163@~@-LAB@- (km)" -O -K >> $ps
     echo "0.63 1.05 b" | gmt pstext $rgnx $scalex -F+f18p+jBL -C+tO -Gwhite -W1p,black -N -O >> $ps
     rm litho.cpt
 
@@ -74,7 +74,7 @@ plot_LAB_magmatism_paper_figure(){
     gmt pscoast $rgn_map $proj_map -Dh -A50000/0/2 -Wthin,black -O -K >> $ps
     awk '{if ($4<=10) print $1, $2, $3}' ${fold_data_output}/Antarctica_magmatism_LAB_${model}_blockmean.xyaszs |\
       gmt psxy $proj $rgn -Cage.cpt -St0.4c -O -K >> $ps
-    gmt psscale -Dx-1.3c/0.5c+w9c/0.25c+e+mal -Clitho.cpt -B50f10+l"z@-LAB@- (km)" -O -K >> $ps
+    gmt psscale -Dx-1.3c/0.5c+w9c/0.25c+ef+mal -Clitho.cpt -B50f10+l"z@-LAB@- (km)" -O -K >> $ps
     echo "-0.08 1.05 ANT-20" | gmt pstext $rgnx $scalex -F+f18p+jTL -C+tO -Gwhite -W1p,black -N -O -K >> $ps
     echo "-0.06 -0.05 a" | gmt pstext $rgnx $scalex -F+f18p+jBL -C+tO -Gwhite -W1p,black -N -O -K >> $ps
     rm litho.cpt
@@ -89,12 +89,12 @@ plot_LAB_magmatism_paper_figure(){
     gmt pscoast $rgn_map $proj_map -Dh -A50000/0/2 -Wthin,black -O -K >> $ps
     awk '{if ($4<=10) print $1, $2, $3}' ${fold_data_output}/Antarctica_magmatism_LAB_${model}_blockmean.xyaszs |\
       gmt psxy $proj $rgn -Cage.cpt -St0.4c -O -K >> $ps
-    gmt psscale -Dx11.0c/0.5c+w9c/0.25c+e -Clitho.cpt -B50f10+l"z@-LAB@- (km)" -O -K >> $ps
+    gmt psscale -Dx11.0c/0.5c+w9c/0.25c+ef -Clitho.cpt -B50f10+l"z@-LAB@- (km)" -O -K >> $ps
     echo "0.55 1.05 SL2013sv" | gmt pstext $rgnx $scalex -F+f18p+jTL -C+tO -Gwhite -W1p,black -N -O -K >> $ps
     echo "0.72 -0.05 b" | gmt pstext $rgnx $scalex -F+f18p+jBR -C+tO -Gwhite -W1p,black -N -O -K >> $ps
     rm litho.cpt
 
-    gmt psscale -Dx-4.5c/-1.1c+w7c/0.25c+e+h -Cage.cpt -B5f1+l"Age (Ma)" -O -K >> $ps
+    gmt psscale -Dx-4.5c/-1.1c+w7c/0.25c+ef+h -Cage.cpt -B5f1+l"Age (Ma)" -O -K >> $ps
 
     # Plot panel c, mean LAB SL2013
     model="SL2013"
@@ -104,7 +104,7 @@ plot_LAB_magmatism_paper_figure(){
     gmt psbasemap $rgn_map $proj_map -Bxa30f15 -K -O -Y-12.3c -X-11.8c >> $ps
     gmt grdimage $LABgrid -Clitho.cpt $rgn_map $proj_map -E600 -O -K >> $ps
     gmt pscoast $rgn_map $proj_map -Dh -A50000/0/2 -Wthin,black -O -K >> $ps
-    gmt psscale -Dx-1.3c/0.5c+w9c/0.25c+e+mal -Clitho.cpt -B10f5+l"@~\163@~@-LAB@- (km)" -O -K >> $ps
+    gmt psscale -Dx-1.3c/0.5c+w9c/0.25c+ef+mal -Clitho.cpt -B10f5+l"@~\163@~@-LAB@- (km)" -O -K >> $ps
     echo "0.08 1.05 ANT-20" | gmt pstext $rgnx $scalex -F+f18p+jTR -C+tO -Gwhite -W1p,black -N -O -K >> $ps
     echo "-0.06 -0.05 c" | gmt pstext $rgnx $scalex -F+f18p+jBL -C+tO -Gwhite -W1p,black -N -O -K >> $ps
     rm litho.cpt
@@ -118,7 +118,7 @@ plot_LAB_magmatism_paper_figure(){
     gmt pscoast $rgn_map $proj_map -Dh -A50000/0/2 -Wthin,black -O -K >> $ps
     awk '{if ($4<=10) print $1, $2, $3}' ${fold_data_output}/Antarctica_magmatism_LAB_${model}_blockmean.xyaszs |\
       gmt psxy $proj $rgn -Cage.cpt -St0.4c -O -K >> $ps
-    gmt psscale -Dx11.0c/0.5c+w9c/0.25c+e -Clitho.cpt -B50f10+l"z@-LAB@- (km)" -O -K >> $ps
+    gmt psscale -Dx11.0c/0.5c+w9c/0.25c+ef -Clitho.cpt -B50f10+l"z@-LAB@- (km)" -O -K >> $ps
     echo "0.55 1.05 CAM2016" | gmt pstext $rgnx $scalex -F+f18p+jTL -C+tO -Gwhite -W1p,black -N -O -K >> $ps
     echo "0.72 -0.05 d" | gmt pstext $rgnx $scalex -F+f18p+jBR -C+tO -Gwhite -W1p,black -N -O -K >> $ps
     rm litho.cpt
