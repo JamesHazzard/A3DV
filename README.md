@@ -24,6 +24,7 @@ This guide explains how to use the code provided in this repository in order to 
 9. **pappa19** (Comparison of estimated LAB structure to previous study)
 10. **westvseast** (Separation of calculated thermomechanical outputs into West vs. East Antarctica for analysis)
 11. **complexviscosity** (Analysis of the effect of time-dependence on agreement between seismic- and geodetic-based inferences of Antarctic viscosity)
+    
 ### Data directories
 1. **ANT-20_S_i_abs** (ANT-20 seismic data)
 2. **QRFSI12** (QRFSI12 attenuation data)
@@ -33,7 +34,7 @@ Code directories contain scripts that turn an input into an output. Data directo
 
 ### Code directory structure
 
-Each code directory contains a **config** folder, in which you can store a [config_name].ini file. An example of how the config file should be structured is included in each code directory. The config file tells the scripts in the code directory where it can find inputs, and where it should store outputs. 
+Each code directory contains a **config** folder, in which you can store a [config_name].ini file. An example of how the config file should be structured is included in each code directory. The config file tells the scripts in the code directory where it can find inputs, and where it should store outputs. Some paths are relative (see example config files and adjust to your own paths as needed).
 
 You will also find **data_input**, **data_output**, **plot_output** and **scripts** folders. These are relatively self-explanatory. The names of these folders match the example config file.
 

@@ -179,7 +179,7 @@ mkdir -p ${fold_plot_output}
 mkdir -p ${fold_data_output}
 
 #prepare_conductive_cooling_envelope
-#plot_LAB_magmatism_paper_figure
+plot_LAB_magmatism_paper_figure
 plot_LAB
 
 rm -f gmt.conf gmt.history *.cpt junk* ints

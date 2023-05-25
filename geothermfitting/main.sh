@@ -339,13 +339,11 @@ fold_logs=${fold_data_output_archive}/logs
 file_log=${fold_logs}/RUN_${fold_date}.log
 echo -n >> ${file_log}
 
-#get_hpc_data
-#make_latest_output_dirs
-#grid_type="HF"
-#calculate_model_summary
-#run_geotherms_MAP
-plot_geotherms_MAP
-#plot_crustal_grids
+make_latest_output_dirs
+run_LAB1200_distribution
+grid_type="LAB1200"
+calculate_model_summary
+filter_model_summary
 
 rm -f gmt.* input.dat output.dat geoth.out lacdevs.dat
 remove_empty_dirs

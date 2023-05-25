@@ -1048,11 +1048,11 @@ summary_type="distribution/summary" # choose distribution/(individual/summary) o
 
 #convert_temperature_potential_temperature_grids
 #plot_temperature_quad_panel
-#plot_viscosity_quad_panel
+plot_viscosity_quad_panel
 #plot_thermodynamic_histograms
 #plot_thermodynamic_distance_histograms
 
-get_comparison_plot_output
-convert_temperature_potential_temperature_comparison_grids
-plot_temperature_distance_quad_panel
-plot_viscosity_distance_quad_panel
+#get_comparison_plot_output
+#convert_temperature_potential_temperature_comparison_grids
+#plot_temperature_distance_quad_panel
+#plot_viscosity_distance_quad_panel

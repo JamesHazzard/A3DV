@@ -633,7 +633,7 @@ def density_fld_ga(temps, pres, grun, a0, a1, dens_ref, K0, KT, A, C):
    dV_x=np.zeros(np.shape(pres_x))
    for i in np.arange(0,np.size(pres_x[:,0]),1):
        for j in np.arange(0,np.size(pres_x[0,:]),1):
-           res = minimize_scalar(dV,bounds=(A, C), args=(K0,KT,pres_x[i,j]), method='brent')
+           res = minimize_scalar(dV, bounds=(A, C), args=(K0,KT,pres_x[i,j]), method='bounded')
            dV_x[i,j]=res.x
    alphaP0=dV_x*np.exp((grun+1.)*((dV_x**(-1.))-1.))
    rhoP0=dens_ref*dV_x
